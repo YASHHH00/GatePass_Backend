@@ -1,0 +1,72 @@
+// Prisma Schema for NTPC Gate Pass Application
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model GatePass {
+  id               Int       @id @default(autoincrement())
+  gatePassNumber   String    @unique
+  version          Int       @default(1)
+  parentId         Int?      // null for originals; references original record's id for renewals
+  isLatest         Boolean   @default(true)
+
+  // Applicant Details
+  name             String
+  phoneNumber      String
+  gender           String
+  fatherName       String
+  profession       String    // Visitor | Worker | Student
+  permanentAddress String
+  stateDistrict    String
+  circleOffice     String
+  firmName         String?
+  whomToMeet       String
+  reason           String
+  vehicleNumber    String
+  idType           String
+  idNumber         String
+  material         String?
+
+  // Photo
+  photoPath        String    // relative file path to stored photo
+
+  // Dates
+  dateOfIssue      DateTime  @default(now())
+  validUpto        DateTime
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([idNumber])
+  @@index([parentId])
+  @@index([isLatest])
+  @@index([profession, dateOfIssue])
+}
+
+model DailySequence {
+  id      Int    @id @default(autoincrement())
+  date    String @unique // format: YYYY-MM-DD
+  lastSeq Int    @default(0)
+}
+
+model LicenseCache {
+  id              Int       @id @default(1)
+  lastVerified    DateTime
+  status          String    // valid | grace | expired
+  gracePeriodDays Int       @default(3)
+  graceStartedAt  DateTime?
+  expiresAt       DateTime?
+}
