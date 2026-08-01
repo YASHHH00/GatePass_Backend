@@ -24,15 +24,28 @@ app.use(helmet({
 }));
 
 // CORS — restrict to localhost/Electron origins in production
-const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? ['http://localhost:5000', 'app://./']
-    : '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5000',
+  'app://./',
+  'https://gatepass-frontend-purr.onrender.com'
+];
+
+app.use(cors({
+  origin(origin, callback) {
+    // Allow requests with no origin (Postman, curl, etc.)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-};
-app.use(cors(corsOptions));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 // ---------------------------------------------------------------------------
 // Body Parsing
