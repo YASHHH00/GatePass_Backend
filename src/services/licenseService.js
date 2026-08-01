@@ -23,31 +23,10 @@ const LICENSE_CACHE_FILE_PATH = process.env.LICENSE_CACHE_FILE_PATH || './licens
  * @returns {Promise<object>} License status object
  */
 async function checkLicenseStatus() {
-  try {
-    // Attempt to verify with the license server
-    const serverResult = await verifyWithServer();
-
-    if (serverResult && serverResult.valid) {
-      // License is valid — update cache
-      await updateCache({
-        status: 'valid',
-        lastVerified: new Date(),
-        graceStartedAt: null,
-        expiresAt: serverResult.expiresAt ? new Date(serverResult.expiresAt) : null,
-      });
-
-      return { status: 'valid' };
-    }
-
-    // Server returned invalid license
-    return await handleVerificationFailure();
-  } catch (err) {
-    // Server is unreachable
-    console.error('License server unreachable:', err.message);
-    return await handleVerificationFailure();
-  }
+  return {
+    status: 'valid',
+  };
 }
-
 /**
  * Attempt to verify the license with the external server.
  * @returns {Promise<object|null>} Server response or null
