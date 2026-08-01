@@ -93,9 +93,15 @@ async function handleVerificationFailure() {
     return { status: 'expired' };
   }
 
+  const now = new Date();
+
+  // If the cache indicates the license is valid and hasn't expired, it remains valid offline
+  if (cache.status === 'valid' && cache.expiresAt && now < new Date(cache.expiresAt)) {
+    return { status: 'valid' };
+  }
+
   if (cache.status === 'valid') {
-    // First failure — start grace period
-    const now = new Date();
+    // First failure and license has expired (or missing expiry) — start grace period
     const graceStartedAt = cache.graceStartedAt || now;
 
     await updateCache({
